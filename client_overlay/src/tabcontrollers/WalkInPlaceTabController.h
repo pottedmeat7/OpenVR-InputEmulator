@@ -194,6 +194,7 @@ namespace walkinplace {
 		float hmdMaxZVel = 0;
 		float minHMDPeakVal = 0.0;
 		float maxCNTRLVal = 0.0;
+		float avgCNTRLVal = 0.0;
 		float minTRKRPeakVal = 0.0;
 		float maxTRKRPeakVal = 0.0;
 		float sNValidTouch = 0;
@@ -209,7 +210,7 @@ namespace walkinplace {
 
 		const double timeStep = 1.0 / 40.0;
 		const double dT = timeStep * 1000;
-		const double identifyDeviceTO = 7000;
+		const double identifyDeviceTO = 3000;
 		double timeLastTick = 0.0;
 		double timeLastVelTick = 0.0;
 		double timeLastCNTRLSN = 0.0;
@@ -232,7 +233,7 @@ namespace walkinplace {
 		void runSampleOnModel();
 		void testHMDSample(double dt);
 		void testTRKRSample(double dt);
-		float determineSampleTouch(double dt);
+		float determineInputScale();
 		void determineCurDirection();
 
 		void stopMovement();

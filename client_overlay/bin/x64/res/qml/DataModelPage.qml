@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Dialogs 1.2
 import pottedmeat7.walkinplace 1.0
 
-MyGraphViewPage {
+MyStackGraphPage {
     id: dataModelPage
     name: "dataModelPage"
 
@@ -90,10 +90,10 @@ MyGraphViewPage {
 
             ColumnLayout {
                 anchors.fill: parent
-                width: 2200
+                width: 1700
                 
                 RowLayout {
-                    width: 2200
+                    width: 1700
                     Button {
                         id: headerBackButton
                         Layout.preferredHeight: 60
@@ -262,21 +262,21 @@ MyGraphViewPage {
             GridLayout {
                 columns: 1
                 rows: 1
-                width: 2500
-                height: 1300
+                width: 1800
+                height: 900
 
                 Canvas {
                     id: modelCanvas
-                    width: 2500
-                    height: 1200
+                    width: 1800
+                    height: 800
                     antialiasing: true
                     Layout.row: 1
                     Layout.column: 1
                     Layout.columnSpan: 1
                     Layout.rowSpan: 1
 
-                    property int rectWidth: 2500
-                    property int rectHeight: 1200
+                    property int rectWidth: 1800
+                    property int rectHeight: 800
                     property int circleRad: 15
                     property int topX : 50
                     property int topY : 0
@@ -458,20 +458,18 @@ MyGraphViewPage {
                                 var r = (gMax - gMin)  
                                 var g = (modelCanvas.rectHeight)
                                 for(var x=0; x<touchPoints.length; x++) {
-                                    if ( touchPoints[x] >= 0 ) {
-                                        ctx.beginPath();                
-                                        ctx.strokeStyle = "#DDDD00";
-                                        ctx.lineWidth = 1;
-                                        ctx.moveTo(lastX,lastTouchPoint);
-                                        var graphPoint = (-1*touchPoints[x]) * gMax;
-                                        var finalPoint = (((graphPoint - gMin) * g) / r)
-                                        var val = finalPoint;
-                                        ctx.lineTo(lastX+graphXScale,val+topY);
-                                        lastTouchPoint = val+topY;
-                                        ctx.stroke();
-                                        ctx.closePath();
-                                        lastX = lastX + graphXScale;
-                                    }
+                                    ctx.beginPath();                
+                                    ctx.strokeStyle = "#DDDD00";
+                                    ctx.lineWidth = 1;
+                                    ctx.moveTo(lastX,lastTouchPoint);
+                                    var graphPoint = (-1*touchPoints[x]) * gMax;
+                                    var finalPoint = (((graphPoint - gMin) * g) / r)
+                                    var val = finalPoint;
+                                    ctx.lineTo(lastX+graphXScale,val+topY);
+                                    lastTouchPoint = val+topY;
+                                    ctx.stroke();
+                                    ctx.closePath();
+                                    lastX = lastX + graphXScale;
                                 }
                             }
                         } catch (error) {         

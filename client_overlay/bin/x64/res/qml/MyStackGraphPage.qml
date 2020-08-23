@@ -1,12 +1,12 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.2
-import "." // QTBUG-34418, singletons require explicit import to load qmldir file
+import "." 
 
 Rectangle {
-    width: 2500
-    height: 1500
     color: myPalette.base
+    width: 1800
+    height: 1000
 
     property string name : "default"
 
@@ -14,7 +14,7 @@ Rectangle {
 
     property Item content: Frame {
         background: Rectangle {
-            color: myPalette.base
+            color: "transparent"
         }
         MyText {
             text: "Content"

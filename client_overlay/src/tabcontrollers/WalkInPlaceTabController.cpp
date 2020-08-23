@@ -317,8 +317,12 @@ namespace walkinplace {
 				hmdMaxZVel = arma::abs(dataModel.row(HMD_Z_VEL_IDX)).max();
 				modelCNTRL1 = arma::abs(dataModel.row(CNTRL1_Y_VEL_IDX));
 				modelCNTRL2 = arma::abs(dataModel.row(CNTRL2_Y_VEL_IDX));
-				minHMDPeakVal = findMinPeakMN(reqSNHMD, dataModel.row(HMD_Y_VEL_IDX), 0.001);
+				minHMDPeakVal = findMinPeakMN(reqSNHMD, dataModel.row(HMD_Y_VEL_IDX), 0.007);
 				maxCNTRLVal = std::max(modelCNTRL1.max(), modelCNTRL2.max());
+				avgCNTRLVal = arma::sum(modelCNTRL1) / modelCNTRL1.n_cols;
+				if (controller2ID != vr::k_unTrackedDeviceIndexInvalid) {
+					avgCNTRLVal = (avgCNTRLVal + arma::sum(modelCNTRL2) / modelCNTRL2.n_cols) / 2.0;
+				}
 				maxTRKRPeakVal = dataModel.row(TRKR1_Y_VEL_IDX).max();
 				float temp = dataModel.row(TRKR2_Y_VEL_IDX).max();
 				maxTRKRPeakVal = temp > maxTRKRPeakVal ? temp : maxTRKRPeakVal;
@@ -1129,7 +1133,7 @@ namespace walkinplace {
 	void WalkInPlaceTabController::enableDevice(int deviceClass, int devIdx, bool enable, int mode) {
 		int deviceClassI = 0;
 		int idx = 0;
-		int foundDevIdx = -1;
+		uint64_t foundDevIdx = -1;
 		for (auto dev : deviceInfos) {
 			if (dev->deviceClass == deviceClass) {
 				if (deviceClassI == devIdx) {
@@ -1200,8 +1204,14 @@ namespace walkinplace {
 			idx++;
 		}
 		if (foundDevIdx >= 0) {
-			identifyDeviceQ.push(foundDevIdx);
-			identifyDeviceLast = std::chrono::duration_cast <std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+			if (enable 
+				&& (identifyDeviceQ.empty() 
+				|| (identifyDeviceQ.front() != foundDevIdx 
+					&& identifyDeviceQ.back() != foundDevIdx))) 
+			{
+				identifyDeviceQ.push(foundDevIdx);
+				identifyDeviceLast = std::chrono::duration_cast <std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+			}
 		}
 	}
 
@@ -1286,7 +1296,7 @@ namespace walkinplace {
 				determineCurDirection();
 				if (gameType->useAxis) {
 					axisState.x = 0;
-					float tempTouch = determineSampleTouch(tdiff);
+					float tempTouch = determineInputScale();
 					if (sNValidTouch != tempTouch) {
 						sNValidTouch = tempTouch;
 						if (sNValidTouch > 0.5) {
@@ -1327,7 +1337,6 @@ namespace walkinplace {
 					applyKeyMovement();
 				}
 			}
-
 		}
 	}
 
@@ -1406,19 +1415,19 @@ namespace walkinplace {
 									lastValidHMDSampleMKi = mDs.second;
 								}
 							}
-							else if (dataModel(TOUCH_VAL_IDX, mDs.second) < -1) {
+							/*else if (dataModel(TOUCH_VAL_IDX, mDs.second) < -1) {
 								if (mDs.first < hmdVelVariance*sNk) {
-									validSample -= 1;
+									validSample--;
 									if (validSample <= 0) {
 										validSample = false;
 										lastValidHMDSampleMKi = mDs.second;
 										stopMovement();
 									}
 								}
-							}
+							}*/
 							else {
-								validSample++;
-								validSample = validSample > reqSNHMD ? reqSNHMD : validSample;
+								//validSample++;
+								//validSample = validSample > reqSNHMD ? reqSNHMD : validSample;
 								lastValidHMDSampleMKi = mDs.second;
 							}
 						}
@@ -1510,7 +1519,7 @@ namespace walkinplace {
 		}
 	}
 
-	float WalkInPlaceTabController::determineSampleTouch(double tdiff) {
+	float WalkInPlaceTabController::determineInputScale() {
 		float nextTouch = 0;
 		try {
 			if (paceControl == PaceControlType::AvgControllerModelMatch
@@ -1533,10 +1542,10 @@ namespace walkinplace {
 					double cntrl2VelY = std::abs(cont2Vel.v[1]);
 					if (controller2ID != vr::k_unTrackedDeviceIndexInvalid) {
 						if (cntrl2VelY > cntrl1VelY) {
-							return std::min(1.0, cntrl2VelY / maxCNTRLVal);
+							return std::min(1.0, cntrl2VelY / avgCNTRLVal);
 						}
 					}
-					return std::min(1.0, cntrl1VelY / maxCNTRLVal);
+					return std::min(1.0, cntrl1VelY / avgCNTRLVal);
 				}
 				int n = cntrlSample.n_cols;
 				cntrlSample.insert_cols(n, 1);
@@ -1549,23 +1558,41 @@ namespace walkinplace {
 					cntrlSample(1, n) = cont2Vel.v[1];
 				}
 				if (cntrlSample.n_cols >= reqSNCNTRL) {
-					arma::rowvec mN = arma::abs(dataModel.row(CNTRL1_Y_VEL_IDX));
-					arma::rowvec sN = arma::abs(cntrlSample.row(0));
-					arma::rowvec lastSN = sN.tail_cols(std::min(n, reqSNCNTRL));
-					if (paceControl == PaceControlType::CurControllerModelMatch) {
-						std::pair<float, int> mDs = computeSNDelta(lastSN, mN);
-						nextTouch = dataModel(TOUCH_VAL_IDX, mDs.second);
+					if (controller1ID == tracker1ID) {
+						if (paceControl == PaceControlType::CurControllerModelMatch) {
+							nextTouch = dataModel(TOUCH_VAL_IDX, lastValidTRKRSampleMKi);
+						}
+						else if (paceControl == PaceControlType::AvgControllerHMDModelMatch) {
+							nextTouch = (dataModel(TOUCH_VAL_IDX, lastValidTRKRSampleMKi) + dataModel(TOUCH_VAL_IDX, lastValidHMDSampleMKi)) / 2.0;
+							if (controller2ID != tracker2ID && controller2ID != vr::k_unTrackedDeviceIndexInvalid) {
+								arma::rowvec mN = arma::abs(dataModel.row(CNTRL2_Y_VEL_IDX));
+								arma::rowvec sN = arma::abs(cntrlSample.row(0));
+								arma::rowvec lastSN = sN.tail_cols(reqSNCNTRL);
+								std::pair<float, int> mDs2 = computeSNDelta(lastSN, mN);
+								float avgCntrlTouch = (dataModel(TOUCH_VAL_IDX, lastValidTRKRSampleMKi) + dataModel(TOUCH_VAL_IDX, mDs2.second)) / 2.0;
+								nextTouch = (avgCntrlTouch + dataModel(TOUCH_VAL_IDX, lastValidHMDSampleMKi)) / 2.0;
+							}
+						}
 					}
-					else if (paceControl == PaceControlType::AvgControllerHMDModelMatch) {
-						std::pair<float, int> mDs1 = computeSNDelta(lastSN, mN);
-						nextTouch = (dataModel(TOUCH_VAL_IDX, mDs1.second) + dataModel(TOUCH_VAL_IDX, lastValidHMDSampleMKi)) / 2.0;
-						if (controller2ID != vr::k_unTrackedDeviceIndexInvalid) {
-							arma::rowvec mN = arma::abs(dataModel.row(CNTRL2_Y_VEL_IDX));
-							arma::rowvec sN = arma::abs(cntrlSample.row(0));
-							arma::rowvec lastSN = sN.tail_cols(reqSNCNTRL);
-							std::pair<float, int> mDs2 = computeSNDelta(lastSN, mN);
-							float avgCntrlTouch = (dataModel(TOUCH_VAL_IDX, mDs1.second) + dataModel(TOUCH_VAL_IDX, mDs2.second)) / 2.0;
-							nextTouch = (avgCntrlTouch + dataModel(TOUCH_VAL_IDX, lastValidHMDSampleMKi)) / 2.0;
+					else {
+						arma::rowvec mN = arma::abs(dataModel.row(CNTRL1_Y_VEL_IDX));
+						arma::rowvec sN = arma::abs(cntrlSample.row(0));
+						arma::rowvec lastSN = sN.tail_cols(std::min(n, reqSNCNTRL));
+						if (paceControl == PaceControlType::CurControllerModelMatch) {
+							std::pair<float, int> mDs = computeSNDelta(lastSN, mN);
+							nextTouch = dataModel(TOUCH_VAL_IDX, mDs.second);
+						}
+						else if (paceControl == PaceControlType::AvgControllerHMDModelMatch) {
+							std::pair<float, int> mDs1 = computeSNDelta(lastSN, mN);
+							nextTouch = (dataModel(TOUCH_VAL_IDX, mDs1.second) + dataModel(TOUCH_VAL_IDX, lastValidHMDSampleMKi)) / 2.0;
+							if (controller2ID != vr::k_unTrackedDeviceIndexInvalid) {
+								arma::rowvec mN = arma::abs(dataModel.row(CNTRL2_Y_VEL_IDX));
+								arma::rowvec sN = arma::abs(cntrlSample.row(0));
+								arma::rowvec lastSN = sN.tail_cols(reqSNCNTRL);
+								std::pair<float, int> mDs2 = computeSNDelta(lastSN, mN);
+								float avgCntrlTouch = (dataModel(TOUCH_VAL_IDX, mDs1.second) + dataModel(TOUCH_VAL_IDX, mDs2.second)) / 2.0;
+								nextTouch = (avgCntrlTouch + dataModel(TOUCH_VAL_IDX, lastValidHMDSampleMKi)) / 2.0;
+							}
 						}
 					}
 					arma::rowvec cntrl1 = arma::abs(cntrlSample.row(0));
@@ -1873,6 +1900,7 @@ namespace walkinplace {
 			if (dataModel(TOUCH_VAL_IDX, lastValidHMDSampleMKi) > -1) {
 				lastValidHMDSampleMKi = 0;
 			}
+			lastValidHMDSampleMKi = 0;
 			lastValidTRKRSampleMKi = 0;
 			lastCNTRLSampleMKi = 0;
 			sNValidTouch = 0;

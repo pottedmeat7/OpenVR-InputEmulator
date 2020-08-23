@@ -491,10 +491,8 @@ MyStackViewPage {
                             currentSampleTime = sampleLimit
                         }
                         scaleSpeed = (((currentSampleTime / sampleLimit) * 0.5) + 0.5).toFixed(1)
-                    } else if ( autoConfMode == 4 ) {
+                    } else if ( autoConfMode > 3 ) {
                         scaleSpeed = 1
-                    } else if ( autoConfMode == 5 ) {
-                        scaleSpeed = -2
                     }
                     velVals = WalkInPlaceTabController.trainingDataSample(scaleSpeed, timerInterval);
                 }
@@ -643,14 +641,6 @@ MyStackViewPage {
                             autoConfigPopup.setTimeout(3)
                             autoConfigPopup.openPopup()
                         } else if ( autoConfMode == 4 ) {
-                            autoConfMode = 5
-                            sampleTime = 0
-                            currentSampleTime = 0
-                            autoConfigPopup.setTitle("No Locmotion Config")
-                            autoConfigPopup.setTextDetail("Make other movements that disable input")
-                            autoConfigPopup.setTimeout(3)
-                            autoConfigPopup.openPopup()
-                        } else if ( sampleTime >= sampleLimit*2 && autoConfMode == 5 ) {
                             stopTimer()
                             resetGraph()
                             autoConfMode = -2
@@ -659,7 +649,7 @@ MyStackViewPage {
                             autoConfigPopup.setTextDetail("Start Walking IN PLACE in")
                             autoConfigPopup.setTimeout(5)
                             var page = mainView.pop()
-                            mainView.completeTraining() 
+                            mainView.completeTraining()                            
                         }                       
                     }
                 }
@@ -714,12 +704,11 @@ MyStackViewPage {
         id: autoConfInfoPopup
         property int modelIndex: -1
         dialogTitle: ""
-        dialogText1: "The data model creation process takes ~35 seconds 5 seconds for each phase."
-        dialogText2: "The process records walking,jogging,running"
-        dialogText3: "and movements that disable input (ducking etc.)"
-        dialogText4: "~25 seconds for movements you want to trigger input"
-        dialogText5: "10 seconds for movements you want to disable input."
-        dialogText6: "You can always try it, view it, recreate it, if you dont have the pattern you like."
+        dialogText1: "The data model creation process takes ~25 seconds 5 seconds for each phase."
+        dialogText2: "The process starts with slowest to increasing to medium to medium to increasing to fast to fastest."
+        dialogText3: "Do not stop moving during this process."
+        dialogText4: "If you do it will be recorded and used as a valid movement model."
+        dialogText5: "You can always try it, view it, and recreate the model until you have what you'd like."
         onClosed: {
             if (okClicked) {
                 autoConfigPopup.openPopup()

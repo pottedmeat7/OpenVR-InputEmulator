@@ -18,9 +18,8 @@ MyMainViewPage {
     content: ColumnLayout {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        Layout.alignment: Qt.AlignHCenter
-        Layout.fillHeight: true
         spacing: 7
+        Layout.fillHeight: true
 
         GroupBox {
             Layout.fillWidth: true
@@ -130,7 +129,6 @@ MyMainViewPage {
                         text: "OVRWIP Controller"
                         Layout.preferredWidth: 250
                     }
-
                 }
             }
         }
@@ -166,7 +164,7 @@ MyMainViewPage {
                     RowLayout {
                         spacing: 0
                         MyText {
-                            text: "You can change which devices are used in the data model with 'Tracked Devices' below."
+                            text: "You can change which devices create the data model with 'Tracked Devices' below."
                             Layout.preferredWidth: 800
                             Layout.preferredHeight: 20
                             Layout.maximumWidth: 800

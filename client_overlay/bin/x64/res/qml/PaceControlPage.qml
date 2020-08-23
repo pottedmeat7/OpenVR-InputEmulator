@@ -29,8 +29,8 @@ MyStackViewPage {
     content: ColumnLayout {
         anchors.top: parent.top
         Layout.leftMargin: 100
-        Layout.alignment: Qt.AlignHCenter
         spacing: 7
+        Layout.alignment: Qt.AlignHCenter
 
         GroupBox {
             Layout.fillWidth: true
@@ -81,224 +81,235 @@ MyStackViewPage {
                     MyText {
                         id: headerTitle
                         text: "OpenVR-WalkInPlace"
-                        font.pointSize: 22
+                        font.pointSize: 24
                     }
                 }
             }
         }
 
-        GridLayout {
-            columns: 6
-            id: paceConfigBox1
-            anchors.top: parent.top
-            anchors.topMargin: 80
-            anchors.leftMargin: 100
+        ColumnLayout {
+            spacing: 7
+            Layout.alignment: Qt.AlignHCenter
 
-            MyText {
-                text: "Slow Pace Touch"
-                horizontalAlignment: Text.AlignHCenter
-                Layout.preferredWidth: 220
-            }
+            GroupBox {
+                Layout.minimumWidth: 1200
+                Layout.alignment: Qt.AlignHCenter
+                anchors.centerIn: parent
 
-            MyText {
-                text: " "
-                Layout.preferredWidth: 70
-            }  
-
-            MyText {
-                text: "Medium Pace Touch"
-                horizontalAlignment: Text.AlignHCenter
-                Layout.preferredWidth: 220
-            }
-
-            MyText {
-                text: " "
-                Layout.preferredWidth: 70
-            }  
-
-            MyText {
-                text: "Max Pace Touch"
-                horizontalAlignment: Text.AlignHCenter
-                Layout.preferredWidth: 220
-            }
-
-            MyText {
-                text: " "
-                Layout.preferredWidth: 70
-            }  
-        }
-
-        GridLayout {
-            id: paceConfigBox2
-            anchors.top: paceConfigBox1.bottom
-            anchors.topMargin: 10
-            anchors.leftMargin: 100
-            columns: 15
-
-            MyPushButton {
-                id: minTouchMinusButton
-                Layout.preferredWidth: 40
-                text: "-"
-                onClicked: {
-                    var val = minTouch - thresholdStep
-                    setMinTouch(val)
+                label: MyText {
+                    text: "Input Scale Config"
                 }
-            }
 
-            MyTextField {
-                id: minTouchInputField
-                text: "0.2"
-                keyBoardUID: 120
-                Layout.preferredWidth: 140
-                horizontalAlignment: Text.AlignHCenter
-                function onInputEvent(input) {
-                    var val = parseFloat(input)
-                    if (!isNaN(val)) {
-                        setMinTouch(val)
-                    } 
+                background: Rectangle {
+                    color: myPalette.mid
+                    border.color: myPalette.mid
+                    radius: 1
                 }
-            }
 
-            MyPushButton {
-                id: minTouchPlusButton
-                Layout.preferredWidth: 40
-                text: "+"
-                onClicked: {
-                    var val = minTouch + thresholdStep
-                    setMinTouch(val)
-                }
-            }
+                ColumnLayout {
+                    anchors.fill: parent
 
-            MyText {
-                text: " "
-                Layout.preferredWidth: 70
-            }  
+                    GridLayout {
+                        columns: 6
 
-            MyPushButton {
-                id: midTouchMinusButton
-                Layout.preferredWidth: 40
-                text: "-"
-                onClicked: {
-                    var val = midTouch - thresholdStep
-                    setMidTouch(val)
-                }
-            }
+                        MyText {
+                            text: "Slow Pace Touch"
+                            horizontalAlignment: Text.AlignHCenter
+                            Layout.preferredWidth: 220
+                        }
 
-            MyTextField {
-                id: midTouchInputField
-                text: "0.5"
-                keyBoardUID: 121
-                Layout.preferredWidth: 140
-                horizontalAlignment: Text.AlignHCenter
-                function onInputEvent(input) {
-                    var val = parseFloat(input)
-                    if (!isNaN(val)) {
-                        setMidTouch(val)
-                    } 
-                }
-            }
+                        MyText {
+                            text: " "
+                            Layout.preferredWidth: 70
+                        }  
 
-            MyPushButton {
-                id: midTouchPlusButton
-                Layout.preferredWidth: 40
-                text: "+"
-                onClicked: {
-                    var val = midTouch + thresholdStep
-                    setMidTouch(val)
-                }
-            }
+                        MyText {
+                            text: "Medium Pace Touch"
+                            horizontalAlignment: Text.AlignHCenter
+                            Layout.preferredWidth: 220
+                        }
 
-            MyText {
-                text: " "
-                Layout.preferredWidth: 70
-            }  
+                        MyText {
+                            text: " "
+                            Layout.preferredWidth: 70
+                        }  
 
-            MyPushButton {
-                id: maxTouchMinusButton
-                Layout.preferredWidth: 40
-                text: "-"
-                onClicked: {
-                    var val = maxTouch - thresholdStep
-                    setMaxTouch(val)
-                }
-            }
+                        MyText {
+                            text: "Max Pace Touch"
+                            horizontalAlignment: Text.AlignHCenter
+                            Layout.preferredWidth: 220
+                        }
 
-            MyTextField {
-                id: maxTouchInputField
-                text: "1.0"
-                keyBoardUID: 122
-                Layout.preferredWidth: 140
-                horizontalAlignment: Text.AlignHCenter
-                function onInputEvent(input) {
-                    var val = parseFloat(input)
-                    if (!isNaN(val)) {
-                        setMaxTouch(val)
-                    } 
-                }
-            }
+                        MyText {
+                            text: " "
+                            Layout.preferredWidth: 70
+                        }  
+                    }
 
-            MyPushButton {
-                id: maxTouchPlusButton
-                Layout.preferredWidth: 40
-                text: "+"
-                onClicked: {
-                    var val = maxTouch + thresholdStep
-                    setMaxTouch(val)
-                }
-            }
+                    GridLayout {
+                        columns: 15
 
-            MyText {
-                text: " "
-                Layout.preferredWidth: 70
-            }  
-        }
+                        MyPushButton {
+                            id: minTouchMinusButton
+                            Layout.preferredWidth: 40
+                            text: "-"
+                            onClicked: {
+                                var val = minTouch - thresholdStep
+                                setMinTouch(val)
+                            }
+                        }
 
-        GroupBox {
-            id: paceConfigBox3
-            anchors.top: paceConfigBox2.bottom
-            anchors.topMargin: 10
-            anchors.leftMargin: 100
-            Layout.maximumWidth: 1200
-            Layout.minimumWidth: 1200
-            Layout.preferredWidth: 1200
-            Layout.fillWidth: true
-            
-            background: Rectangle {
-                color: myPalette.mid
-                border.color: myPalette.mid
-                radius: 1
-            }
+                        MyTextField {
+                            id: minTouchInputField
+                            text: "0.2"
+                            keyBoardUID: 120
+                            Layout.preferredWidth: 186
+                            horizontalAlignment: Text.AlignHCenter
+                            function onInputEvent(input) {
+                                var val = parseFloat(input)
+                                if (!isNaN(val)) {
+                                    setMinTouch(val)
+                                } 
+                            }
+                        }
 
-            ColumnLayout {
-                anchors.fill: parent
+                        MyPushButton {
+                            id: minTouchPlusButton
+                            Layout.preferredWidth: 40
+                            text: "+"
+                            onClicked: {
+                                var val = minTouch + thresholdStep
+                                setMinTouch(val)
+                            }
+                        }
 
-                GridLayout {
-                    columns: 1
+                        MyText {
+                            text: " "
+                            Layout.preferredWidth: 70
+                        }  
 
-                    MyText {
-                        text: "Find 0-1 input with"
-                        Layout.preferredWidth: 240
-                        Layout.preferredHeight: 30
+                        MyPushButton {
+                            id: midTouchMinusButton
+                            Layout.preferredWidth: 40
+                            text: "-"
+                            onClicked: {
+                                var val = midTouch - thresholdStep
+                                setMidTouch(val)
+                            }
+                        }
+
+                        MyTextField {
+                            id: midTouchInputField
+                            text: "0.5"
+                            keyBoardUID: 121
+                            Layout.preferredWidth: 186
+                            horizontalAlignment: Text.AlignHCenter
+                            function onInputEvent(input) {
+                                var val = parseFloat(input)
+                                if (!isNaN(val)) {
+                                    setMidTouch(val)
+                                } 
+                            }
+                        }
+
+                        MyPushButton {
+                            id: midTouchPlusButton
+                            Layout.preferredWidth: 40
+                            text: "+"
+                            onClicked: {
+                                var val = midTouch + thresholdStep
+                                setMidTouch(val)
+                            }
+                        }
+
+                        MyText {
+                            text: " "
+                            Layout.preferredWidth: 70
+                        }  
+
+                        MyPushButton {
+                            id: maxTouchMinusButton
+                            Layout.preferredWidth: 40
+                            text: "-"
+                            onClicked: {
+                                var val = maxTouch - thresholdStep
+                                setMaxTouch(val)
+                            }
+                        }
+
+                        MyTextField {
+                            id: maxTouchInputField
+                            text: "1.0"
+                            keyBoardUID: 122
+                            Layout.preferredWidth: 186
+                            horizontalAlignment: Text.AlignHCenter
+                            function onInputEvent(input) {
+                                var val = parseFloat(input)
+                                if (!isNaN(val)) {
+                                    setMaxTouch(val)
+                                } 
+                            }
+                        }
+
+                        MyPushButton {
+                            id: maxTouchPlusButton
+                            Layout.preferredWidth: 40
+                            text: "+"
+                            onClicked: {
+                                var val = maxTouch + thresholdStep
+                                setMaxTouch(val)
+                            }
+                        }
+
+                        MyText {
+                            text: " "
+                            Layout.preferredWidth: 70
+                        }  
                     }
                 }
+            }
+        }
 
-                GridLayout {
+        ColumnLayout {
+            spacing: 7
+            Layout.alignment: Qt.AlignHCenter
+
+            GroupBox {
+                Layout.minimumWidth: 1200
+                Layout.alignment: Qt.AlignHCenter
+                anchors.centerIn: parent
+
+                label: MyText {
+                    text: "Determine input scale with"
+                }
+
+                background: Rectangle {
+                    color: myPalette.mid
+                    border.color: myPalette.mid
+                    radius: 1
+                }
+
+                ColumnLayout {
+                    anchors.fill: parent
+
+                    GridLayout {
                     columns: 1
 
-                    MyComboBox {
-                        id: paceControlDialog 
-                        currentIndex: 0
-                        Layout.maximumWidth: 800
-                        Layout.minimumWidth: 800
-                        Layout.preferredWidth: 800
-                        Layout.preferredHeight: 40
-                        Layout.fillWidth: true
-                        displayText: currentText
-                        model: ["Average Controller Model result", "Average HMD Model result"]
-                        onCurrentIndexChanged: {
-                            if (currentIndex >= 0) { 
-                                WalkInPlaceTabController.setPaceControl(currentIndex)       
-                            } 
+                        MyComboBox {
+                            id: paceControlDialog 
+                            currentIndex: 0
+                            Layout.maximumWidth: 800
+                            Layout.minimumWidth: 800
+                            Layout.preferredWidth: 800
+                            Layout.preferredHeight: 40
+                            Layout.fillWidth: true
+                            displayText: currentText
+                            model: ["Average Controller Model result", "Average HMD Model result", "Average Controller and HMD Pace", "Arm Swing Controller Pace"]
+                            onCurrentIndexChanged: {
+                                if (currentIndex >= 0) { 
+                                    WalkInPlaceTabController.setPaceControl(currentIndex)       
+                                } 
+                            }
                         }
                     }
                 }

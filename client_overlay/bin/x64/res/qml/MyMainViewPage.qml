@@ -1,13 +1,17 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
 import QtQuick.Layouts 1.2
-import "." // QTBUG-34418, singletons require explicit import to load qmldir file
+import "." 
 
 Rectangle {
     width: 1500
     height: 800
     color: myPalette.base
+    
+    anchors.top: parent.top
     anchors.left: parent.left
+    anchors.topMargin: 125
+    anchors.leftMargin: 120
 
     property string name : "default"
 
